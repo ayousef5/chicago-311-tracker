@@ -1,0 +1,57 @@
+# ---------- .NET / ASP.NET Core ----------
+bin/
+obj/
+*.user
+*.suo
+*.rsuser
+*.userprefs
+[Dd]ebug/
+[Rr]elease/
+TestResults/
+*.nupkg
+.vs/
+
+# Local settings and secrets (appsettings.json is committed; local overrides are not)
+appsettings.*.local.json
+appsettings.Local.json
+secrets.json
+
+# ---------- Angular / Node.js ----------
+node_modules/
+dist/
+.angular/
+out-tsc/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+
+# ---------- Python (importer) ----------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ---------- Environment / secrets ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---------- Editors / IDEs ----------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+.history/
+
+# ---------- macOS ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*

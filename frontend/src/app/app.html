@@ -1,0 +1,80 @@
+<main class="page">
+  <header class="page-header">
+    <h1>Chicago 311 Service Requests</h1>
+    <p class="subtitle">
+      Recent non-emergency service requests submitted to the City of Chicago.
+      Search and filter the list below.
+    </p>
+  </header>
+
+  <section class="cards">
+    <div class="card">
+      <span class="card-label">Total Requests</span>
+      <span class="card-value">{{ totalCount() }}</span>
+    </div>
+    <div class="card card-open">
+      <span class="card-label">Open Requests</span>
+      <span class="card-value">{{ openCount() }}</span>
+    </div>
+    <div class="card card-closed">
+      <span class="card-label">Closed Requests</span>
+      <span class="card-value">{{ closedCount() }}</span>
+    </div>
+  </section>
+
+  <section class="filters">
+    <input
+      type="search"
+      class="search"
+      placeholder="Search by request number, address, or type"
+      [value]="searchText()"
+      (input)="onSearch($event)"
+    />
+    <select class="status-select" [value]="statusFilter()" (change)="onStatusChange($event)">
+      <option value="All">All Statuses</option>
+      <option value="Open">Open</option>
+      <option value="Closed">Closed</option>
+    </select>
+  </section>
+
+  @if (loading()) {
+    <p class="message">Loading requests...</p>
+  } @else if (error()) {
+    <p class="message error">{{ error() }}</p>
+  } @else {
+    <p class="result-count">Showing {{ filteredRequests().length }} of {{ totalCount() }} requests</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Request</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Department</th>
+            <th>Address</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (request of filteredRequests(); track request.srNumber) {
+            <tr>
+              <td class="nowrap">{{ request.srNumber }}</td>
+              <td>{{ request.srType }}</td>
+              <td>
+                <span class="badge" [class.badge-open]="isOpen(request)">{{ request.status }}</span>
+              </td>
+              <td>{{ request.ownerDepartment }}</td>
+              <td>{{ request.streetAddress }}</td>
+              <td class="nowrap">{{ request.createdDate | date: 'MMM d, y, h:mm a' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty">No requests match your search.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>
