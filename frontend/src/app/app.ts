@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 interface ServiceRequest {
   srNumber: string;
@@ -65,7 +66,7 @@ export class App implements OnInit {
 
   loadRequests(): void {
     this.http
-      .get<ServiceRequest[]>('http://localhost:5181/api/ServiceRequests')
+      .get<ServiceRequest[]>(environment.apiUrl)
       .subscribe({
         next: (data) => {
           this.requests.set(data);
