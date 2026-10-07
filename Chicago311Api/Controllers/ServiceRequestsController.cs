@@ -1,53 +1,52 @@
-using Chicago311Api.Data;
-using Chicago311Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Json;
 
 namespace Chicago311Api.Controllers;
 
-// Handles HTTP requests for Chicago 311 service requests.
 [ApiController]
 [Route("api/[controller]")]
 public class ServiceRequestsController : ControllerBase
 {
-    // Gives us access to the MySQL database.
-    private readonly AppDbContext _context;
+    private readonly HttpClient _httpClient;
 
-    // Gets the database context from ASP.NET Core.
-    public ServiceRequestsController(AppDbContext context)
+    public ServiceRequestsController(HttpClient httpClient)
     {
-        _context = context;
+        _httpClient = httpClient;
     }
 
-    // GET: /api/ServiceRequests
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ServiceRequest>>> GetRequests()
+    public async Task<IActionResult> GetRequests()
     {
-        // Get the 100 most recent requests.
-        var requests = await _context.ServiceRequests
-            .OrderByDescending(request => request.CreatedDate)
-            .Take(100)
-            .ToListAsync();
+        // Get the 100 most recent Chicago 311 requests.
+        var url =
+            "https://data.cityofchicago.org/resource/v6vf-nfxy.json" +
+            "?$limit=100&$order=created_date DESC";
 
-        // Return the requests as JSON.
+        // Call the Chicago 311 API.
+        var requests = await _httpClient.GetFromJsonAsync<object[]>(url);
+
+        // Return the Chicago 311 data to our frontend.
         return Ok(requests);
     }
 
-    // GET: /api/ServiceRequests/SR26-02042784
     [HttpGet("{srNumber}")]
-    public async Task<ActionResult<ServiceRequest>> GetRequest(string srNumber)
+    public async Task<IActionResult> GetRequest(string srNumber)
     {
-        // Find the request using its primary key.
-        var request = await _context.ServiceRequests
-            .FindAsync(srNumber);
+        // Search for one service request by its number.
+        var url =
+            "https://data.cityofchicago.org/resource/v6vf-nfxy.json" +
+            $"?sr_number={Uri.EscapeDataString(srNumber)}";
+
+        // Call the Chicago 311 API.
+        var requests = await _httpClient.GetFromJsonAsync<object[]>(url);
 
         // Return 404 if the request does not exist.
-        if (request == null)
+        if (requests == null || requests.Length == 0)
         {
-            return NotFound();
+            return NotFound(new { message = "Service request not found" });
         }
 
-        // Return the request as JSON.
-        return Ok(request);
+        // Return the first matching request.
+        return Ok(requests[0]);
     }
 }
