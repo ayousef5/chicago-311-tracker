@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://chicago-311-tracker-production.up.railway.app/api/ServiceRequests'
+  apiUrl: 'https://chicago311-api-ay.azurewebsites.net/api/ServiceRequests'
 };
