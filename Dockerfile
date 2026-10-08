@@ -18,8 +18,9 @@ RUN cd frontend && npm run build
 # Serve the Angular app with nginx
 FROM nginx:alpine
 
-# Copy the built Angular files
-COPY --from=build /app/frontend/dist/chicago-311-frontend /usr/share/nginx/html
+# Listen on Railway's PORT (80 if it is not set)
+ENV PORT=80
+COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the built Angular files (Angular writes them to the browser/ folder)
+COPY --from=build /app/frontend/dist/chicago-311-frontend/browser /usr/share/nginx/html

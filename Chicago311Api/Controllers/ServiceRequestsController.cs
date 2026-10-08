@@ -1,5 +1,8 @@
+using Chicago311Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Chicago311Api.Controllers;
 
@@ -7,6 +10,15 @@ namespace Chicago311Api.Controllers;
 [Route("api/[controller]")]
 public class ServiceRequestsController : ControllerBase
 {
+    // The Chicago 311 API uses snake_case names (sr_number) and sends numbers as
+    // strings, so read it into our ServiceRequest model. The frontend then gets
+    // the same camelCase JSON (srNumber) it always has.
+    private static readonly JsonSerializerOptions ChicagoJson = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        NumberHandling = JsonNumberHandling.AllowReadingFromString
+    };
+
     private readonly HttpClient _httpClient;
 
     public ServiceRequestsController(HttpClient httpClient)
@@ -23,7 +35,7 @@ public class ServiceRequestsController : ControllerBase
             "?$limit=100&$order=created_date DESC";
 
         // Call the Chicago 311 API.
-        var requests = await _httpClient.GetFromJsonAsync<object[]>(url);
+        var requests = await _httpClient.GetFromJsonAsync<ServiceRequest[]>(url, ChicagoJson);
 
         // Return the Chicago 311 data to our frontend.
         return Ok(requests);
@@ -38,7 +50,7 @@ public class ServiceRequestsController : ControllerBase
             $"?sr_number={Uri.EscapeDataString(srNumber)}";
 
         // Call the Chicago 311 API.
-        var requests = await _httpClient.GetFromJsonAsync<object[]>(url);
+        var requests = await _httpClient.GetFromJsonAsync<ServiceRequest[]>(url, ChicagoJson);
 
         // Return 404 if the request does not exist.
         if (requests == null || requests.Length == 0)
