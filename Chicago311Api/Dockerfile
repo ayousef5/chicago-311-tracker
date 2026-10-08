@@ -1,14 +1,19 @@
-# Build stage: restore and publish the API.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
-COPY Chicago311Api.csproj .
-RUN dotnet restore
-COPY . .
-RUN dotnet publish -c Release -o /app --no-restore
 
-# Runtime stage: run the published API.
-# Railway supplies PORT; Program.cs binds to 0.0.0.0:$PORT.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /src
+
+COPY Chicago311Api/Chicago311Api.csproj Chicago311Api/
+RUN dotnet restore Chicago311Api/Chicago311Api.csproj
+
+COPY Chicago311Api/ Chicago311Api/
+
+WORKDIR /src/Chicago311Api
+RUN dotnet publish Chicago311Api.csproj -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+
 WORKDIR /app
-COPY --from=build /app .
+
+COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "Chicago311Api.dll"]
